@@ -2,7 +2,7 @@
 import Image from "next/image";
 import {useState,useEffect} from 'react'
 import { firestore } from "@/firebase";
-import { collection, getDocs, query } from "firebase/firestore";
+import { collection, deleteDoc, getDoc, getDocs, query, setDoc, doc} from "firebase/firestore";
 
 
 export default function Home() {
@@ -22,20 +22,78 @@ export default function Home() {
     })
     setInventory(inventoryList);
   }
+  const removeItem = async(item)=>{
+    const docref = doc(collection(firestore,'inventory'),item) //the doc we are getting from db
+    const docsnapshot = await getDoc(docref)
+    if(docsnapshot.exists()){
+      const {count} = docsnapshot.data()
+      if(count == 1){
+        await deleteDoc(docref)//if count is 1 and we are deleting then delete the docref from db
+      }
+      else{
+        await setDoc(docref,{count:count-1})//set count -1
+      }
+    }
+
+
+  }
+
+  const addItem = async(item)=>{
+    const docref = doc(collection(firestore,'inventory'),item) //the doc we are getting from db
+    const docsnapshot = await getDoc(docref)
+    if(docsnapshot.exists()){
+      const {count} = docsnapshot.data()
+      
+      await setDoc(docref,{count:count-1})//if it exists add one
+      
+    }
+    else{
+      await setDoc(docref,{count:1})//set quanity to 1 if doc doesnt exist
+    }
+
+
+  }
+  const handleOpen = ()=>{
+    setOpen(true)
+  }
+  const handleClose = ()=>{
+    setOpen(false)
+  }
 
   useEffect(()=>{
     updateInventory()
-  }
+  },[]
   )
   return (
     <div> 
       <p className="text-4xl text-center font-semibold my-7">Inventory Management</p>
-      {inventory.map((item) => (
-        <div key={item.name}>
-          <p>{item.name}</p>
-          <p>{item.count}</p>
-        </div>
-      ))}
+      <div>
+        <input type="text" placeholder="Item Name"></input>
+        <input type="number" placeholder="Item Count"></input>
+        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Add to Inventory</button>
+      </div>
+      <table className="min-w-full border-collapse block md:table center">
+        <thead className="block md:table-header-group">
+          <tr className="border border-gray-300 md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto md:relative">
+            <th className="bg-gray-600 p-2 text-white font-bold md:border md:border-gray-300 text-left block md:table-cell">Name</th>
+            <th className="bg-gray-600 p-2 text-white font-bold md:border md:border-gray-300 text-left block md:table-cell">Count</th>
+            <th className="bg-gray-600 p-2 text-white font-bold md:border md:border-gray-300 text-left block md:table-cell">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="block md:table-row-group">
+          {inventory.map((item) => (
+            <tr key={item.name} className="bg-gray-300 border border-gray-500 md:border-none block md:table-row">
+              <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">{item.name}</td>
+              <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">{item.count}</td>
+              <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
+                <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 border border-green-500 rounded" onClick={() => addItem(item.name)}>Add</button>
+                <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 border border-red-500 rounded ml-2" onClick={() => removeItem(item.name)}>Remove</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        </table>
+      
     </div>
   );
     
