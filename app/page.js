@@ -9,7 +9,6 @@ export default function Home() {
   const [inventory,setInventory] = useState([]);
   const [itemName, setItemName] = useState('');
   const [itemCount, setItemCount] = useState(1);
-  const [open,setOpen]= useState(false)
   const [searchQuery, setSearchQuery] = useState('');
 
   //returns an array w the updated inventory from db
@@ -74,26 +73,35 @@ export default function Home() {
 
     updateInventory();//update inventory
   }
-  const handleOpen = ()=>{
-    setOpen(true)
-  }
-  const handleClose = ()=>{
-    setOpen(false)
-  }
-
+  
+  
   useEffect(()=>{
     updateInventory()
   },[]
   )
+  //To filter inventory by search bar
+  const filteredInventory = inventory.filter(item => 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   return (
     <div> 
-      <p className="text-4xl text-center font-semibold my-7">Inventory Management</p>
+      <p className="text-4xl text-center font-medium my-7">Inventory Management</p>
+      <div className="flex justify-center mb-4">
+        <input
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className='bg-slate-50 mb-2 p-2 rounded'
+          type="text"
+          placeholder="Search Inventory"
+        />
+      </div>
       <div className="mb-4 flex justify-center" >
         <input value={itemName} onChange={(e) => setItemName(e.target.value)} className='bg-slate-50' type="text" placeholder="Item Name"></input>
         <input value={itemCount} onChange={(e) => setItemCount(parseInt(e.target.value))} className='bg-slate-50'type="number" placeholder="Item Count"></input>
         <button onClick={addNewItem} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Add to Inventory</button>
       </div>
-      <table className="min-w-full mx-auto border-spacing-1 block md:table center">
+      <div className="overflow-x-auto bg-slate-50 p-4 rounded-lg shadow-md">
+      <table className="min-w-full mx-auto border-blue-950 block md:table center">
         <thead className="block md:table-header-group">
           <tr className="border border-gray-300 md:border-none block md:table-row absolute -top-full md:top-auto -left-full md:left-auto md:relative">
             <th className="bg-gray-600 p-2 text-white font-bold md:border md:border-gray-300 text-left block md:table-cell">Name</th>
@@ -102,19 +110,19 @@ export default function Home() {
           </tr>
         </thead>
         <tbody className="block md:table-row-group">
-          {inventory.map((item) => (
+          {filteredInventory.map((item) => (
             <tr key={item.name} className="bg-gray-300 border border-gray-500 md:border-none block md:table-row">
               <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">{item.name}</td>
               <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">{item.count}</td>
               <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
-                <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 border border-green-500 rounded" onClick={() => addItem(item.name)}>Add</button>
-                <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 border border-red-500 rounded ml-2" onClick={() => removeItem(item.name)}>Remove</button>
+                <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 border border-green-500 rounded" onClick={() => addItem(item.name)}>Add 1</button>
+                <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 border border-red-500 rounded ml-2" onClick={() => removeItem(item.name)}>Remove 1</button>
               </td>
             </tr>
           ))}
         </tbody>
         </table>
-      
+        </div>
     </div>
   );
     
